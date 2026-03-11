@@ -57,9 +57,9 @@ pipeline {
             steps {
                 script {
                     if (isUnix()) {
-                        sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                        sh "docker build -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ."
                     } else {
-                        bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                        bat "docker build -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ."
                     }
                 }
             }
