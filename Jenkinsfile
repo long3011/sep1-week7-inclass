@@ -21,6 +21,12 @@ pipeline {
             }
         }
 
+        stage('Run Tests') {
+            steps {
+                bat 'mvn clean test'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
