@@ -17,7 +17,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/long3011/sep1-week7-inclass.git'
+                git branch: 'main', url: 'https://github.com/long3011/sep1-week7-inclass.git'
             }
         }
 
