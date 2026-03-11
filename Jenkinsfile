@@ -14,23 +14,53 @@ pipeline {
     }
 
     stages {
-
-        stage('Checkout') {
+        stage('Setup Maven') {
             steps {
-                git branch: 'main', url: 'https://github.com/long3011/sep1-week7-inclass.git'
+                script {
+                    def mvnHome = tool name: 'Maven3', type: 'maven'
+                    env.PATH = "${mvnHome}/bin:${env.PATH}"
+                }
             }
         }
 
-        stage('Run Tests') {
+        stage('Checkout') {
             steps {
-                bat 'mvn clean test'
+                git branch: 'master', url: 'https://github.com/long3011/sep1-week7-inclass.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'mvn clean package -DskipTests'
+                    } else {
+                        bat 'mvn clean package -DskipTests'
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'mvn test'
+                    } else {
+                        bat 'mvn test'
+                    }
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
+                    if (isUnix()) {
+                        sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    } else {
+                        bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    }
                 }
             }
         }
@@ -38,12 +68,11 @@ pipeline {
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
-                        docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
+                    docker.withRegistry('https://index.docker.io/v1/', env.DOCKERHUB_CREDENTIALS_ID) {
+                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
                     }
                 }
             }
         }
-
     }
 }
